@@ -1,23 +1,37 @@
 import React, { Component } from 'react'
-import { Form, Icon, Input, Button } from 'antd';
+import { Form, Icon, Input,Button, message } from 'antd';
 import './login.less'
-import icon from './img/login-icon.jpg'
+import icon from '../../assets/images/login-icon.jpg'
+import {reqLogin} from '../../api/index'
+import { async } from 'q';
+import {Redirect} from 'react-router-dom'
+import storageUtils from '../../utils/storageUtils'
 const Item = Form.Item;
  class Login extends Component {
-     
-    handleSubmit = e => {
+   
+    handleSubmit(e) {
         //阻止事件的默認行為：表單的提交
         e.preventDefault();
-        this.props.form.validateFields((err, values) => {
+       this.props.form.validateFields( async(err, values) => {
             if (!err) {
-              console.log('Received values of form: ', values);
+             const result = await reqLogin(values.username,values.password)
+             console.log(result)
+             console.log(result.status)
+             if (result.status==0) {
+                storageUtils.removeUser()
+                 storageUtils.savaUser(result.data)
+                  this.props.history.replace('/')
+                 message.success('登陆成功')
+              }else if(result.status==1){
+                     message.error(result.data.msg)
+              }
             }else{
-                //alert("校验失败")
+                message.error("校验失败")
             }
           });
-    //     const from =this.props.form;
-    //     const values=from.getFieldsValue()
-    //     console.log(values)
+        // const from =this.props.form;
+        // const values=from.getFieldsValue()
+        // console.log(values)
 
     //    console.log('Received values of form: ');
     };
@@ -31,9 +45,16 @@ const Item = Form.Item;
             callback('密码必须小于12位')
         }else if(!/^[A-Za-z0-9_]+$/.test(value)){
             callback('密码必须是数字、英文、下划线')
+        }else{
+            callback()
         }
     }
     render() {
+        //如果user已经登陆跳转到管理页面
+        var user=storageUtils.getUser()
+        if (user._id) {
+            return <Redirect to="/"></Redirect>
+        }
         const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form;
 
         return <div className="login">
@@ -43,7 +64,7 @@ const Item = Form.Item;
             </div>
             <div className="login-container">
                 <h1>用户登录</h1>
-               <Form layout="inline" onSubmit={this.handleSubmit}>
+               <Form layout="inline" onSubmit={this.handleSubmit.bind(this)}>
                         <Item >
                         {getFieldDecorator('username',{
                             initialValue:'',

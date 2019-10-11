@@ -1,14 +1,12 @@
 import ajax from './ajax.js'
+import axios from './ajax.js'
 // const baseURL='https://localhost:44332/api'
 const baseURL=''
-
-export function reqLogin(username,passward){
-    ajax({
-        method:'get',
-        url:baseURL+'/api/login',
-        data:{username,passward}
-    })
-}
-const name='admin'
-const pwd='admin'
-reqLogin(name,pwd)
+// export const reqLogin =(username,passward)=>(
+//     ajax({
+//         method:'post',
+//         url:baseURL+'/api/login/Post',
+//         data:{username,passward}
+//     })
+// )
+export const reqLogin =(username,password)=>ajax.post(baseURL+'/api/login/Post',{username,password})
