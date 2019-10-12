@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Icon, Input,Button, message } from 'antd';
+import { Form, Icon, Input,Button, message ,Spin} from 'antd';
 import './login.less'
 import icon from '../../assets/images/login-icon.jpg'
 import {reqLogin} from '../../api/index'
@@ -8,19 +8,30 @@ import {Redirect} from 'react-router-dom'
 import storageUtils from '../../utils/storageUtils'
 const Item = Form.Item;
  class Login extends Component {
-   
+   state={
+       loading:false
+   }
     handleSubmit(e) {
         //阻止事件的默認行為：表單的提交
         e.preventDefault();
        this.props.form.validateFields( async(err, values) => {
             if (!err) {
+             this.setState({
+                 loading:true
+             })
              const result = await reqLogin(values.username,values.password)
              console.log(result)
              console.log(result.status)
              if (result.status==0) {
                 storageUtils.removeUser()
                  storageUtils.savaUser(result.data)
+                 this.setState({
+                    loading:false
+                })
                   this.props.history.replace('/')
+                  message.config({
+                    top: 300,
+                })
                  message.success('登陆成功')
               }else if(result.status==1){
                      message.error(result.data.msg)
@@ -64,6 +75,7 @@ const Item = Form.Item;
             </div>
             <div className="login-container">
                 <h1>用户登录</h1>
+                <Spin tip="登录中..." spinning={this.state.loading}>
                <Form layout="inline" onSubmit={this.handleSubmit.bind(this)}>
                         <Item >
                         {getFieldDecorator('username',{
@@ -91,6 +103,7 @@ const Item = Form.Item;
                                 登 錄</Button>
                         </Item>
                     </Form>
+                    </Spin>
              </div>
         </div>
     }
