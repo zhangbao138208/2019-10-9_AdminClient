@@ -1,10 +1,16 @@
 import React, { Component } from 'react'
-import { Card, Button, Icon, Input, Table, Select } from 'antd'
+import { Card, Button, Icon, Input, Table, Select,message } from 'antd'
 import LinkButton from '../../components/link-button'
+import {reqProducts,reqProductsUpdateStatus} from '../../api/index'
+import memoryUtils from '../../utils/memoryUtils'
 const Option = Select.Option
 export default class Products extends Component {
     state = {
-        data: [{id:1,name:'nike',desc:'的是法第三方',price:1000,status:1}]
+        data: [],
+        total:0,
+        pageSize:2,
+        searchType:'1',//安名称搜索
+        searchName:''
     }
     initalColumns = () => {
         this.columns = [
@@ -14,7 +20,7 @@ export default class Products extends Component {
             },
             {
                 title: '商品描述',
-                dataIndex: 'desc'
+                dataIndex: 'description'
             },
             {
                 title: '价格',
@@ -24,8 +30,7 @@ export default class Products extends Component {
             {
                 title: '状态',
                 width:100,
-                dataIndex: 'status',
-                render:(status)=>{
+                render:({status,id})=>{
                   let btext='下架'
                   let text='在售'
                   if (status===2) {
@@ -33,7 +38,7 @@ export default class Products extends Component {
                       text='已下架'
                   }
                     return <span>
-                      <Button type='primary'>{btext}</Button>
+                      <Button type='primary' onClick={()=>this.productUpdateStatus(id,status)}>{btext}</Button>
                       <br></br>
                       <span>{text}</span>
                     </span>
@@ -42,22 +47,48 @@ export default class Products extends Component {
             {
                 title: '操作',
                 width:80,
-                render:()=><LinkButton>操作详情</LinkButton>
+                render:(product)=><div>
+                <LinkButton onClick={()=>{
+                    memoryUtils.product=product
+                    this.props.history.push('/products/detail')
+                    }}>详情</LinkButton>
+                <LinkButton>修改</LinkButton></div>
             }
         ]
+    }
+    productUpdateStatus= async(id,status)=>{
+      status= status===1?2:1
+      const result =await reqProductsUpdateStatus({productId:id,status})
+      if (result.status===0) {
+          message.success('更新商品状态成功')
+          this.getProducts(this.pageNum)
+      }else{
+          message.error(result.msg)
+      }
+    }
+    getProducts= async(pageNum)=>{
+        this.pageNum=pageNum
+        const {pageSize,searchType,searchName}=this.state
+      const result=await reqProducts({pageNum,pageSize,searchType,searchName})
+      if (result.status===0) {
+          this.setState({data:result.data,total:result.total})
+      }
     }
     componentWillMount() {
         this.initalColumns()
     }
+    componentDidMount(){
+        this.getProducts(1)
+    }
     render() {
-        const { data } = this.state
+        const { data ,pageSize,total,searchName,searchType} = this.state
         const title = (<span>
-            <Select style={{ width: 150 }} value='1'>
+            <Select style={{ width: 150 }} value={searchType} onChange={(value)=>{this.setState({searchType:value})}}>
                 <Option value='1'>按名称搜索</Option>
                 <Option value='2'>按描述搜索</Option>
             </Select>
-            <Input placeholder='关键字' style={{ width: 120, margin: '0 10px' }}></Input>
-            <Button type='primary'>搜索</Button>
+            <Input placeholder='关键字' style={{ width: 120, margin: '0 10px' }} value={searchName} onChange={(e)=>{this.setState({searchName:e.target.value})}}></Input>
+            <Button type='primary' onClick={()=>{this.getProducts(1)}}>搜索</Button>
         </span>)
         const extra = (<Button type='primary'><Icon type='plus'></Icon>添加商品</Button>)
         return <div className="products">
@@ -67,9 +98,10 @@ export default class Products extends Component {
                     columns={this.columns}
                     dataSource={data}
                     bordered
-                    pagination={{ defaultPageSize: 7, showQuickJumper: true }}
+                    pagination={{ defaultPageSize:pageSize , total,onChange:this.getProducts,showQuickJumper: true }}
                 />
             </Card>
+            
         </div>
     }
 }

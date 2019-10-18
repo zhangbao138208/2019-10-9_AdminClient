@@ -28,4 +28,9 @@ export const reqWeather=(city)=>{
 export const reqCategorys=()=>ajax(baseURL+'/api/manage/category')
 export const reqAddCategory=(name)=>ajax.post(baseURL+'/api/manage/AddCategory',{name})
 export const reqUpdateCategory=({id,name})=>ajax.post(baseURL+'/api/manage/UpdateCategory',{id,name})
+export const reqProductsUpdateStatus=({productId,status})=>ajax.post(baseURL+'/api/manage/ProductsUpdateStatus',{productId,status})
+
+export const reqProducts=({pageNum,pageSize,searchType,searchName})=>ajax(baseURL+'/api/manage/Products',{params:{pageNum,pageSize,searchType,searchName}})
+export const reqRoles=()=>ajax(baseURL+'/api/Roles/getRoles')
+export const reqUpdateRoles=(roles)=>ajax.post(baseURL+'/api/Roles/updateRoles',roles)
 
