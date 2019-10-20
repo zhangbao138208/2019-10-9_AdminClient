@@ -13,12 +13,14 @@ import Category from '../Category/Category'
 import Bar from '../chats/bar'
 import Line from '../chats/line'
 import Pie from '../chats/pie'
+import { connect } from 'react-redux'
 
 const { Footer, Sider, Content } = Layout;
-export default class Admin extends Component{
+ class Admin extends Component{
   render(){
-    var user=storageUtils.getUser()
-    if (!user._id) {
+    var user=this.props.user
+    if (!user.id) {
+      debugger
         return <Redirect to="/login"></Redirect>
     }
       return  <div style={{height:'100%'}}>
@@ -47,3 +49,4 @@ export default class Admin extends Component{
     </div>
   }
 }
+export default connect(state=>({user:state.user}),{})(Admin)
