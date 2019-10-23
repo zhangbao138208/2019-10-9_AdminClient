@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Form, Icon, Input, Button, message, Spin } from 'antd';
+import { Form, Icon, Input, Button, message, Spin } from 'antd'
 import './login.less'
 import icon from '../../assets/images/login-icon.jpg'
 import { Redirect } from 'react-router-dom'
@@ -51,7 +51,7 @@ class Login extends Component {
 
         }
         const errorMsg = user.errorMsg
-        const { getFieldDecorator, getFieldsError, getFieldError, isFieldTouched } = this.props.form;
+        const { getFieldDecorator } = this.props.form;
 
         return <div className="login">
             <div className="login-header">
